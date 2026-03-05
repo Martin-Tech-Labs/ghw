@@ -121,9 +121,18 @@ if argsArray.first == "login" {
   _ = argsArray.removeFirst()
   guard let user = popFlag("--as") else { usageAndExit(2) }
 
-  let token = readStdinAll().trimmingCharacters(in: .whitespacesAndNewlines)
+  // Default behavior:
+  // - If stdin is a TTY: prompt for token with hidden input.
+  // - Else (piped/CI): read from stdin.
+  let token: String
+  if isatty(STDIN_FILENO) == 1 {
+    token = (try? readSecret(prompt: "GitHub token (input hidden): "))?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+  } else {
+    token = readStdinAll().trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
   if token.isEmpty {
-    FileHandle.standardError.write(Data("Token must be provided via stdin.\n".utf8))
+    FileHandle.standardError.write(Data("Token must be provided (interactive prompt or via stdin).\n".utf8))
     exit(2)
   }
 
