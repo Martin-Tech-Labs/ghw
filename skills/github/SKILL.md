@@ -14,7 +14,8 @@ This skill is the **single entrypoint** for GitHub work.
 - Always use the wrapper:
 
 ```bash
-/Users/agent/.openclaw/workspace/bin/ghw <gh args...>
+# Always pass --as <profile> (default profiles are disabled)
+ghw --as <profile> <gh args...>
 ```
 
 `ghw` injects `GH_TOKEN` from **macOS Keychain** and blocks `gh auth` so GitHub CLI can’t store/read credentials via Keychain shell-outs.
@@ -33,13 +34,13 @@ See: `references/pull-request.md`
 Quick example:
 
 ```bash
-/Users/agent/.openclaw/workspace/bin/ghw pr create --help
+ghw --as <profile> pr create --help
 ```
 
 When creating a PR, prefer using the template file:
 
 ```bash
-/Users/agent/.openclaw/workspace/bin/ghw pr create \
+ghw --as <profile> pr create \
   --title "OPS-123: Short title" \
   --body-file .github/pull_request_template.md
 ```
@@ -53,8 +54,8 @@ Note: repo owners and names vary by task. Do not hardcode an org; use the repo s
 Examples:
 
 ```bash
-/Users/agent/.openclaw/workspace/bin/ghw repo view <owner>/<repo>
-/Users/agent/.openclaw/workspace/bin/ghw repo clone <owner>/<repo>
+ghw --as <profile> repo view <owner>/<repo>
+ghw --as <profile> repo clone <owner>/<repo>
 ```
 
 ## Resources

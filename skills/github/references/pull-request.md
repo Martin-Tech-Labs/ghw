@@ -24,11 +24,13 @@ git checkout -b OPS-123-short-title
 git commit -am "OPS-123: Do the thing"
 
 # Push branch
-/Users/agent/.openclaw/workspace/bin/ghw repo view <owner>/<repo>
+# (always pass --as)
+ghw --as <profile> repo view <owner>/<repo>
 git push -u origin HEAD
 
 # Create PR
-/Users/agent/.openclaw/workspace/bin/ghw pr create \
+# (always pass --as)
+ghw --as <profile> pr create \
   --title "OPS-123: Short title" \
   --body-file .github/pull_request_template.md
 ```

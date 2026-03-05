@@ -107,10 +107,9 @@ func usageAndExit(_ code: Int32 = 2) -> Never {
 Usage:
   ghw login --profile <name> --user <github_username>   # reads token from stdin
   ghw profiles list
-  ghw profiles use <name>
-  ghw whoami [--as <name>]
+  ghw profiles use <name>      # (deprecated; no defaults)
+  ghw whoami --as <name>
   ghw --as <name> <gh args...>
-  ghw <gh args...>
 
 Notes:
 - Blocks: gh auth ... (use ghw login instead)
@@ -188,7 +187,9 @@ if argsArray.count >= 3, argsArray[0] == "profiles", argsArray[1] == "use" {
   }
   cfg.defaultProfile = name
   try cfg.save()
-  print("OK: default profile set to \(name)")
+  // Deprecated: we no longer support default profiles. Keep for backwards-compat,
+  // but do not rely on it.
+  print("Deprecated: default profiles are disabled. Use --as on every command.")
   exit(0)
 }
 
@@ -206,10 +207,11 @@ if argsArray.count >= 2, argsArray[0] == "auth" {
 
 // Load token
 let cfg = (try? Config.load()) ?? Config(defaultProfile: nil, profiles: [:])
-let profileName = asProfile ?? cfg.defaultProfile
 
-guard let pn = profileName, let prof = cfg.profiles[pn] else {
-  FileHandle.standardError.write(Data("No profile selected. Run: ghw login --profile <name> --user <user> (token via stdin)\\n".utf8))
+// Security: require explicit profile selection per command.
+// This prevents accidentally using a different account.
+guard let pn = asProfile, let prof = cfg.profiles[pn] else {
+  FileHandle.standardError.write(Data("Missing --as <profile>. (No default profiles allowed.) Run: ghw profiles list\\n".utf8))
   exit(2)
 }
 

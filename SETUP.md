@@ -65,16 +65,14 @@ Provide a PAT via stdin:
 echo "$GITHUB_PAT" | ghw login --profile toby --user toby-winter-bot
 ```
 
-Set default profile:
+## Usage rule: always pass --as
 
-```bash
-ghw profiles use toby
-```
+For safety, **default profiles are disabled**. You must pass `--as <profile>` on every command.
 
 Test:
 
 ```bash
-ghw whoami
+ghw --as toby whoami
 ```
 
 ## Notes on signing + Keychain access control (planned)
