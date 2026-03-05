@@ -3,13 +3,13 @@
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
 - requires `--as <github_username>` on every command (no defaults)
-- stores PATs in **macOS Keychain**
-- injects **only** `GH_TOKEN` into the `gh` subprocess environment
+- stores GitHub personal access tokens in **macOS Keychain**
+- injects environment variable `GH_TOKEN` into the `gh` subprocess environment
 - blocks `gh auth ...` so `gh` can’t store/read credentials via Keychain shell-outs
 
 ## Why
 
-`gh` can shell out to `/usr/bin/security` (Keychain) depending on configuration. If you accidentally grant broad Keychain access, that’s a security risk.
+`gh` accesses keychain using shell's command security, leading to process  `/usr/bin/security` getting access to the stored GitHub Token. This will allow any process using shell to get access to stored github tokens. See https://github.com/cli/cli/issues/7123.
 
 `ghw` keeps the token flow explicit and local:
 
@@ -52,8 +52,6 @@ chmod +x /Users/agent/.openclaw/workspace/bin/ghw
 echo 'export PATH="/Users/agent/.openclaw/workspace/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 
-# fish (alternative):
-# set -Ux fish_user_paths /Users/agent/.openclaw/workspace/bin $fish_user_paths
 ```
 
 ## Signing (recommended)
@@ -62,7 +60,7 @@ Signing is recommended so we can store Keychain tokens with an ACL that trusts *
 
 > `scripts/sign.sh` contains **no keys**. It just invokes `codesign` with an identity that already exists in your Keychain.
 
-### Option A: Local self-signed Code Signing certificate (no Apple Developer account needed)
+### Option A: Local self-signed Code Signing certificate (no Apple Developer ID needed)
 
 1) Open **Keychain Access**
 2) **Keychain Access → Certificate Assistant → Create a Certificate…**
@@ -110,3 +108,7 @@ ghw --as <github_username> pr create --body-file .github/pull_request_template.m
 ## PR template
 
 This repo includes `.github/pull_request_template.md` copied from the org template.
+
+# Skills
+
+This repo also includes a skill which uses ghw to create repository and manage pull requests along with mandated repository settings and PR templates.
