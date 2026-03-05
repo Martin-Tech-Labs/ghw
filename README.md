@@ -86,13 +86,17 @@ SIGN_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/sign.sh
 
 ## Add an account token
 
-### Preferred: prompt (hidden input)
+### Default: interactive hidden prompt
+
+If you run `ghw login` in a normal terminal, it will prompt for the token with hidden input.
 
 ```bash
-ghw login --as <github_username> --prompt
+ghw login --as <github_username>
 ```
 
-### Alternative: stdin (for automation)
+### Automation/CI: stdin
+
+If stdin is not a TTY (piped input), `ghw login` reads the token from stdin:
 
 ```bash
 echo "$GITHUB_PAT" | ghw login --as <github_username>
