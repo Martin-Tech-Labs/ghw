@@ -81,7 +81,10 @@ func keychainSet(service: String, account: String, value: String) throws {
 func usageAndExit(_ code: Int32 = 2) -> Never {
   let msg = """
 Usage:
-  # Store token for a github.com username (token via stdin)
+  ghw --version
+  ghw --signing
+
+  # Store token for a github.com username (token via stdin or hidden prompt)
   ghw login --as <github_username>
 
   # Test
@@ -89,6 +92,9 @@ Usage:
 
   # Run any gh command (always requires --as)
   ghw --as <github_username> <gh args...>
+
+Environment:
+  GHW_DIAG=1   Print version + signing identity to stderr on every invocation.
 
 Notes:
 - Blocks: gh auth ... (use ghw login instead)
@@ -127,8 +133,34 @@ func ghValidateToken(_ token: String) -> Bool {
   }
 }
 
+func printDiagIfEnabled() {
+  if ProcessInfo.processInfo.environment["GHW_DIAG"] == "1" {
+    let execPath = CommandLine.arguments.first ?? ""
+    let resolved = URL(fileURLWithPath: execPath).resolvingSymlinksInPath().path
+    let msg = "[ghw] version=\(GHW_VERSION) executable=\(resolved) \(SignInfo.signingSummary(executablePath: resolved))\n"
+    FileHandle.standardError.write(Data(msg.utf8))
+  }
+}
+
 let args = CommandLine.arguments.dropFirst()
 if args.isEmpty { usageAndExit(2) }
+
+// Always print diagnostics when explicitly requested.
+if args.contains("--version") {
+  print(GHW_VERSION)
+  exit(0)
+}
+if args.contains("--signing") {
+  let execPath = CommandLine.arguments.first ?? ""
+  let resolved = URL(fileURLWithPath: execPath).resolvingSymlinksInPath().path
+  print("version=\(GHW_VERSION)")
+  print("executable=\(resolved)")
+  print(SignInfo.signingSummary(executablePath: resolved))
+  exit(0)
+}
+
+// Print per-invocation diag when enabled.
+printDiagIfEnabled()
 
 var argsArray = Array(args)
 
