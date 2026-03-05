@@ -2,9 +2,9 @@
 
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
-- Supports multiple profiles (accounts)
+- No default profiles: you must pass `--as <github_username>` per command
 - Stores tokens in macOS Keychain
-- Injects `GH_TOKEN` into the `gh` subprocess environment
+- Injects **only** `GH_TOKEN` into the `gh` subprocess environment
 - Blocks `gh auth ...` commands to avoid `gh` touching Keychain
 
 > Security note: This initial version stores tokens as generic password items.
@@ -14,17 +14,17 @@
 
 ```bash
 swift build -c release
-./.build/release/ghw profiles list
+./.build/release/ghw --help
 ```
 
 ## Auth
 
 ```bash
 # Store token (read from stdin)
-echo "$GITHUB_PAT" | ./.build/release/ghw login --profile toby --user toby-winter-bot
+echo "$GITHUB_PAT" | ./.build/release/ghw login --as toby-winter-bot
 
-# Use profile
-./.build/release/ghw --as toby repo view Martin-Tech-Labs/runbook
+# Run gh
+./.build/release/ghw --as toby-winter-bot repo view Martin-Tech-Labs/runbook
 ```
 
 ## PR template
