@@ -48,6 +48,7 @@ func keychainGet(service: String, account: String) throws -> String {
   return s
 }
 
+// Legacy simple set (no ACL). Prefer keychainSetWithOptionalACL when possible.
 func keychainSet(service: String, account: String, value: String) throws {
   let data = value.data(using: .utf8) ?? Data()
 
@@ -126,8 +127,15 @@ if argsArray.first == "login" {
     exit(2)
   }
 
-  try keychainSet(service: "ai.openclaw.ghw.github.com", account: user, value: token)
-  print("OK: stored token for github_username=\(user)")
+  // Prefer storing with ACL when possible (requires signed ghw and one-time user approval).
+  // If it fails, fall back to a plain Keychain item.
+  do {
+    try keychainSetWithOptionalACL(service: "ai.openclaw.ghw.github.com", account: user, value: token, useACL: true)
+    print("OK: stored token with ACL for github_username=\(user)")
+  } catch {
+    try keychainSetWithOptionalACL(service: "ai.openclaw.ghw.github.com", account: user, value: token, useACL: false)
+    print("OK: stored token (no ACL) for github_username=\(user)")
+  }
   exit(0)
 }
 

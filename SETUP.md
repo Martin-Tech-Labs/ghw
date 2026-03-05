@@ -74,12 +74,20 @@ Test:
 ghw --as <github_username> whoami
 ```
 
-## Notes on signing + Keychain access control (planned)
+## Notes on signing + Keychain access control
 
-The current implementation stores tokens as generic-password items.
+We recommend signing `ghw` and restricting Keychain items so only the signed `ghw` binary can read them.
 
-Next step is to:
-- codesign `ghw`
-- store Keychain items with an ACL restricted to the `ghw` code signature
+### Signing
 
-This prevents other processes from reading tokens via Keychain APIs/`security` without explicit approval.
+`sign.sh` does **not** contain any signing keys. It just calls `codesign` with an identity you already have in your macOS Keychain.
+
+```bash
+swift build -c release
+SIGN_ID="<your codesign identity>" ./scripts/sign.sh
+```
+
+### Keychain ACL
+
+When implemented, `ghw login ...` will store the token in Keychain with an ACL that trusts the signed `ghw` binary.
+This prevents repeated “Allow/Always Allow” prompts in headless runs and prevents other processes from reading the token.
