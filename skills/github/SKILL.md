@@ -21,33 +21,10 @@ This skill is the **single entrypoint** for GitHub work.
 
 ## Setup (one-time)
 
-### 1) Build ghw
+Setup/build/signing/token enrollment live in this repo:
+- `SETUP.md`
 
-```bash
-cd /Users/agent/.openclaw/workspace/projects/ghw
-swift build -c release
-```
-
-### 2) Install ghw into a stable path
-
-```bash
-mkdir -p /Users/agent/.openclaw/workspace/bin
-cp -f /Users/agent/.openclaw/workspace/projects/ghw/.build/release/ghw /Users/agent/.openclaw/workspace/bin/ghw
-```
-
-### 3) Add account token (per profile)
-
-Token must be provided via stdin:
-
-```bash
-echo "$GITHUB_PAT" | /Users/agent/.openclaw/workspace/bin/ghw login --profile toby --user toby-winter-bot
-```
-
-Select default profile:
-
-```bash
-/Users/agent/.openclaw/workspace/bin/ghw profiles use toby
-```
+(Keep this skill focused on *usage*, not installation.)
 
 ## Pull requests
 
