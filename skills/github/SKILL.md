@@ -1,9 +1,9 @@
 ---
 name: github
-description: Manage GitHub (repos + pull requests) safely in Martin-Tech-Labs using the `ghw` wrapper. Always run `gh` operations through `ghw` so tokens come from Keychain and `gh auth …` is blocked. For pull requests, use `ghw pr …` and use the PR template documented in references/pull-request.md.
+description: Manage GitHub repositories + pull requests safely using the `ghw` wrapper. Always run `gh` operations through `ghw` so tokens come from Keychain and `gh auth …` is blocked. For pull requests, use `ghw pr …` and follow the PR template workflow in references/pull-request.md.
 ---
 
-# GitHub (Martin-Tech-Labs) — via `ghw`
+# GitHub — via `ghw`
 
 This skill is the **single entrypoint** for GitHub work.
 
@@ -46,11 +46,15 @@ When creating a PR, prefer using the template file:
 
 ## Repositories
 
-Create/clone/view repos via `ghw`:
+Create/clone/view repos via `ghw`.
+
+Note: repo owners and names vary by task. Do not hardcode an org; use the repo specified by the user/Jira or project runbook.
+
+Examples:
 
 ```bash
-/Users/agent/.openclaw/workspace/bin/ghw repo view Martin-Tech-Labs/runbook
-/Users/agent/.openclaw/workspace/bin/ghw repo clone Martin-Tech-Labs/ghw
+/Users/agent/.openclaw/workspace/bin/ghw repo view <owner>/<repo>
+/Users/agent/.openclaw/workspace/bin/ghw repo clone <owner>/<repo>
 ```
 
 ## Resources

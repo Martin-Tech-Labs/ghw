@@ -33,12 +33,29 @@ Binary:
 
 ## Install (recommended)
 
-Pick a stable location that is on PATH. Example:
+Install `ghw` to a stable location **and add it to PATH**, so you can run `ghw` directly (avoid `./.build/release/...`).
+
+Example:
 
 ```bash
 mkdir -p /Users/agent/.openclaw/workspace/bin
 cp -f ./.build/release/ghw /Users/agent/.openclaw/workspace/bin/ghw
+
+# Add to PATH (choose ONE of the following)
+# zsh:
+echo 'export PATH="/Users/agent/.openclaw/workspace/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# fish:
+# set -Ux fish_user_paths /Users/agent/.openclaw/workspace/bin $fish_user_paths
 ```
+
+After this, use:
+
+```bash
+ghw --help
+```
+
 
 ## Add an account (profile)
 
