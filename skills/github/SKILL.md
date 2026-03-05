@@ -14,8 +14,8 @@ This skill is the **single entrypoint** for GitHub work.
 - Always use the wrapper:
 
 ```bash
-# Always pass --as <profile> (default profiles are disabled)
-ghw --as <profile> <gh args...>
+# Always pass --as <github_username> (no default profiles)
+ghw --as <github_username> <gh args...>
 ```
 
 `ghw` injects `GH_TOKEN` from **macOS Keychain** and blocks `gh auth` so GitHub CLI can’t store/read credentials via Keychain shell-outs.
@@ -34,13 +34,13 @@ See: `references/pull-request.md`
 Quick example:
 
 ```bash
-ghw --as <profile> pr create --help
+ghw --as <github_username> pr create --help
 ```
 
 When creating a PR, prefer using the template file:
 
 ```bash
-ghw --as <profile> pr create \
+ghw --as <github_username> pr create \
   --title "OPS-123: Short title" \
   --body-file .github/pull_request_template.md
 ```
@@ -54,8 +54,8 @@ Note: repo owners and names vary by task. Do not hardcode an org; use the repo s
 Examples:
 
 ```bash
-ghw --as <profile> repo view <owner>/<repo>
-ghw --as <profile> repo clone <owner>/<repo>
+ghw --as <github_username> repo view <owner>/<repo>
+ghw --as <github_username> repo clone <owner>/<repo>
 ```
 
 ## Resources

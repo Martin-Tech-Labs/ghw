@@ -2,9 +2,9 @@
 
 This repo provides `ghw`, a wrapper around GitHub CLI (`gh`) that:
 
-- supports multiple profiles (accounts)
+- supports multiple accounts (by GitHub username)
 - stores PATs in **macOS Keychain**
-- injects `GH_TOKEN` into the `gh` subprocess environment
+- injects **only** `GH_TOKEN` into the `gh` subprocess environment
 - blocks `gh auth ...` to prevent `gh` from touching Keychain
 
 > The security hardening goal is to restrict Keychain items so only the signed `ghw` binary can read them.
@@ -56,23 +56,22 @@ After this, use:
 ghw --help
 ```
 
-
-## Add an account (profile)
+## Add an account
 
 Provide a PAT via stdin:
 
 ```bash
-echo "$GITHUB_PAT" | ghw login --profile toby --user toby-winter-bot
+echo "$GITHUB_PAT" | ghw login --as <github_username>
 ```
 
 ## Usage rule: always pass --as
 
-For safety, **default profiles are disabled**. You must pass `--as <profile>` on every command.
+For safety, there are **no default profiles**. You must pass `--as <github_username>` on every command.
 
 Test:
 
 ```bash
-ghw --as toby whoami
+ghw --as <github_username> whoami
 ```
 
 ## Notes on signing + Keychain access control (planned)

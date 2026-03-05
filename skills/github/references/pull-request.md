@@ -25,12 +25,12 @@ git commit -am "OPS-123: Do the thing"
 
 # Push branch
 # (always pass --as)
-ghw --as <profile> repo view <owner>/<repo>
+ghw --as <github_username> repo view <owner>/<repo>
 git push -u origin HEAD
 
 # Create PR
 # (always pass --as)
-ghw --as <profile> pr create \
+ghw --as <github_username> pr create \
   --title "OPS-123: Short title" \
   --body-file .github/pull_request_template.md
 ```
