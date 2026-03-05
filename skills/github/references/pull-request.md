@@ -1,7 +1,7 @@
-# Pull requests (Martin-Tech-Labs)
+# Pull requests
 
-Use the org PR template as the baseline:
-- https://github.com/Martin-Tech-Labs/.github/blob/main/pull_request_template.md
+Use the org PR template as the baseline (adjust org/owner as needed):
+- https://github.com/<org>/.github/blob/main/pull_request_template.md
 
 ## Minimum requirements
 
@@ -24,7 +24,7 @@ git checkout -b OPS-123-short-title
 git commit -am "OPS-123: Do the thing"
 
 # Push branch
-/Users/agent/.openclaw/workspace/bin/ghw repo view Martin-Tech-Labs/<repo>
+/Users/agent/.openclaw/workspace/bin/ghw repo view <owner>/<repo>
 git push -u origin HEAD
 
 # Create PR
