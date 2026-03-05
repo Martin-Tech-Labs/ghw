@@ -81,7 +81,10 @@ func keychainSet(service: String, account: String, value: String) throws {
 func usageAndExit(_ code: Int32 = 2) -> Never {
   let msg = """
 Usage:
-  # Store token for a github.com username (token via stdin)
+  ghw --version
+  ghw --signing
+
+  # Store token for a github.com username (token via stdin or hidden prompt)
   ghw login --as <github_username>
 
   # Test
@@ -129,6 +132,21 @@ func ghValidateToken(_ token: String) -> Bool {
 
 let args = CommandLine.arguments.dropFirst()
 if args.isEmpty { usageAndExit(2) }
+
+// Global flags
+if args.contains("--version") {
+  print(GHW_VERSION)
+  exit(0)
+}
+
+if args.contains("--signing") {
+  let execPath = CommandLine.arguments.first ?? ""
+  let resolved = URL(fileURLWithPath: execPath).resolvingSymlinksInPath().path
+  print("version=\(GHW_VERSION)")
+  print("executable=\(resolved)")
+  print(SignInfo.signingSummary(executablePath: resolved))
+  exit(0)
+}
 
 var argsArray = Array(args)
 
