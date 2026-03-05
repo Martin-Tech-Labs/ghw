@@ -82,7 +82,7 @@ func usageAndExit(_ code: Int32 = 2) -> Never {
   let msg = """
 Usage:
   # Store token for a github.com username (token via stdin)
-  ghw login --as <github_username>
+  ghw login --as <github_username> [--prompt]
 
   # Test
   ghw whoami --as <github_username>
@@ -121,9 +121,17 @@ if argsArray.first == "login" {
   _ = argsArray.removeFirst()
   guard let user = popFlag("--as") else { usageAndExit(2) }
 
-  let token = readStdinAll().trimmingCharacters(in: .whitespacesAndNewlines)
+  let usePrompt = argsArray.contains("--prompt")
+
+  let token: String
+  if usePrompt {
+    token = (try? readSecret(prompt: "GitHub token (input hidden): "))?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+  } else {
+    token = readStdinAll().trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
   if token.isEmpty {
-    FileHandle.standardError.write(Data("Token must be provided via stdin.\n".utf8))
+    FileHandle.standardError.write(Data("Token must be provided via stdin (or use --prompt).\n".utf8))
     exit(2)
   }
 
