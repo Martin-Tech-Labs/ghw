@@ -103,6 +103,30 @@ func readStdinAll() -> String {
   return String(data: data, encoding: .utf8) ?? ""
 }
 
+func ghValidateToken(_ token: String) -> Bool {
+  // Validate via a lightweight API call.
+  // `gh api user` uses GH_TOKEN and returns 0 on success.
+  let ghPath = "/opt/homebrew/bin/gh"
+  let p = Process()
+  p.executableURL = URL(fileURLWithPath: ghPath)
+  p.arguments = ["api", "user"]
+  var env = ProcessInfo.processInfo.environment
+  env["GH_TOKEN"] = token
+  p.environment = env
+
+  // Silence output; we only care about exit code.
+  p.standardOutput = FileHandle.nullDevice
+  p.standardError = FileHandle.nullDevice
+
+  do {
+    try p.run()
+    p.waitUntilExit()
+    return p.terminationStatus == 0
+  } catch {
+    return false
+  }
+}
+
 let args = CommandLine.arguments.dropFirst()
 if args.isEmpty { usageAndExit(2) }
 
@@ -133,6 +157,12 @@ if argsArray.first == "login" {
 
   if token.isEmpty {
     FileHandle.standardError.write(Data("Token must be provided (interactive prompt or via stdin).\n".utf8))
+    exit(2)
+  }
+
+  // Validate token before storing it.
+  if !ghValidateToken(token) {
+    FileHandle.standardError.write(Data("Token validation failed (gh api user). Not storing token.\n".utf8))
     exit(2)
   }
 
