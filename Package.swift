@@ -9,11 +9,21 @@ let package = Package(
   products: [
     .executable(name: "ghw", targets: ["ghw"])
   ],
+  dependencies: [
+    .package(url: "https://github.com/apple/swift-testing.git", from: "0.12.0")
+  ],
   targets: [
     .executableTarget(
       name: "ghw",
       dependencies: [],
       path: "Sources/ghw"
+    ),
+    .testTarget(
+      name: "ghwTests",
+      dependencies: [
+        .product(name: "Testing", package: "swift-testing")
+      ],
+      path: "Tests/ghwTests"
     )
   ]
 )
