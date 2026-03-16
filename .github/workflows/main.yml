@@ -24,5 +24,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Run tests
+      - name: Run unit tests
         run: swift test
+
+      - name: Run acceptance smoke tests
+        run: ./scripts/acceptance-tests.sh

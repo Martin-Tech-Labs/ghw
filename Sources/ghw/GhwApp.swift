@@ -13,7 +13,21 @@ protocol GhRunning {
 
 struct GhwConfig {
   let service = "ai.openclaw.ghw.github.com"
-  let ghPath = "/opt/homebrew/bin/gh"
+  let ghPath: String
+
+  init() {
+    // Security policy: do not allow overriding gh path in production.
+    // In DEBUG (tests/CI), allow overriding for deterministic acceptance tests.
+    #if DEBUG
+    if let p = ProcessInfo.processInfo.environment["GHW_GH_PATH"], !p.isEmpty {
+      self.ghPath = p
+    } else {
+      self.ghPath = "/opt/homebrew/bin/gh"
+    }
+    #else
+    self.ghPath = "/opt/homebrew/bin/gh"
+    #endif
+  }
 }
 
 enum GhwExit: Error {
