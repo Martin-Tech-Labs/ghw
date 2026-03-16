@@ -42,13 +42,30 @@ swift build -c release
 
 ## Tests
 
+### Unit tests
+
 Run locally:
 
 ```bash
 swift test
 ```
 
-(These are lightweight CI sanity checks; they mainly ensure the package and wrapper plumbing stay buildable.)
+These tests cover the core security policies (blocking `auth`, selecting tokens by `--as`, validating-before-store for `login`, etc.).
+
+### Acceptance / smoke tests
+
+Location:
+- `scripts/acceptance-tests.sh`
+
+Run locally:
+
+```bash
+./scripts/acceptance-tests.sh
+```
+
+What they do (high level):
+- Ensure `ghw auth ...` is blocked.
+- Ensure `ghw login` fails for a fake token (deterministically in DEBUG by using a non-existent `gh` path).
 
 Binary:
 - `./.build/release/ghw`
