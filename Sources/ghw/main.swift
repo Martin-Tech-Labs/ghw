@@ -109,29 +109,6 @@ func readStdinAll() -> String {
   return String(data: data, encoding: .utf8) ?? ""
 }
 
-func ghValidateToken(_ token: String) -> Bool {
-  // Validate via a lightweight API call.
-  // `gh api user` uses GH_TOKEN and returns 0 on success.
-  let ghPath = "/opt/homebrew/bin/gh"
-  let p = Process()
-  p.executableURL = URL(fileURLWithPath: ghPath)
-  p.arguments = ["api", "user"]
-  var env = ProcessInfo.processInfo.environment
-  env["GH_TOKEN"] = token
-  p.environment = env
-
-  // Silence output; we only care about exit code.
-  p.standardOutput = FileHandle.nullDevice
-  p.standardError = FileHandle.nullDevice
-
-  do {
-    try p.run()
-    p.waitUntilExit()
-    return p.terminationStatus == 0
-  } catch {
-    return false
-  }
-}
 
 func printDiagIfEnabled() {
   if ProcessInfo.processInfo.environment["GHW_DIAG"] == "1" {
@@ -162,103 +139,30 @@ if args.contains("--signing") {
 // Print per-invocation diag when enabled.
 printDiagIfEnabled()
 
-var argsArray = Array(args)
+let stdinAll = readStdinAll()
+let isTTY = isatty(STDIN_FILENO) == 1
 
-func popFlag(_ name: String) -> String? {
-  if let i = argsArray.firstIndex(of: name), i + 1 < argsArray.count {
-    let v = argsArray[i + 1]
-    argsArray.removeSubrange(i...i+1)
-    return v
-  }
-  return nil
-}
-
-if argsArray.first == "login" {
-  _ = argsArray.removeFirst()
-  guard let user = popFlag("--as") else { usageAndExit(2) }
-
-  // Default behavior:
-  // - If stdin is a TTY: prompt for token with hidden input.
-  // - Else (piped/CI): read from stdin.
-  let token: String
-  if isatty(STDIN_FILENO) == 1 {
-    token = (try? readSecret(prompt: "GitHub token (input hidden): "))?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-  } else {
-    token = readStdinAll().trimmingCharacters(in: .whitespacesAndNewlines)
-  }
-
-  if token.isEmpty {
-    FileHandle.standardError.write(Data("Token must be provided (interactive prompt or via stdin).\n".utf8))
-    exit(2)
-  }
-
-  // Validate token before storing it.
-  if !ghValidateToken(token) {
-    FileHandle.standardError.write(Data("Token validation failed (gh api user). Not storing token.\n".utf8))
-    exit(2)
-  }
-
-  // Prefer storing with ACL when possible (requires signed ghw and one-time user approval).
-  // If it fails, fall back to a plain Keychain item.
-  do {
-    try keychainSetWithOptionalACL(service: "ai.openclaw.ghw.github.com", account: user, value: token, useACL: true)
-    print("OK: stored token with ACL for github_username=\(user)")
-  } catch {
-    try keychainSetWithOptionalACL(service: "ai.openclaw.ghw.github.com", account: user, value: token, useACL: false)
-    print("OK: stored token (no ACL) for github_username=\(user)")
-  }
-  exit(0)
-}
-
-// whoami: call gh api user
-if argsArray.first == "whoami" {
-  _ = argsArray.removeFirst()
-  argsArray.insert(contentsOf: ["api", "user"], at: 0)
-}
-
-let asUser = popFlag("--as")
-
-// Block gh auth.*
-if argsArray.count >= 1, argsArray[0] == "auth" {
-  FileHandle.standardError.write(Data("Blocked: use `ghw login` instead of `gh auth ...`\n".utf8))
-  exit(2)
-}
-
-// Load token (always require explicit github username)
-guard let user = asUser else {
-  FileHandle.standardError.write(Data("Missing --as <github_username>. Run: ghw login --as <github_username> (token via stdin)\n".utf8))
-  exit(2)
-}
-
-let token: String
- do {
-  token = try keychainGet(service: "ai.openclaw.ghw.github.com", account: user)
- } catch {
-  FileHandle.standardError.write(Data(("Failed to load token from Keychain: \(error)\n").utf8))
-  exit(2)
- }
-
-// Build env
-var env = ProcessInfo.processInfo.environment
-env["GH_TOKEN"] = token
-
-let ghPath = "/opt/homebrew/bin/gh"
-
-let p = Process()
-p.executableURL = URL(fileURLWithPath: ghPath)
-p.arguments = argsArray
-p.environment = env
-
-// Inherit stdio
-p.standardInput = FileHandle.standardInput
-p.standardOutput = FileHandle.standardOutput
-p.standardError = FileHandle.standardError
+let app = GhwApp(keychain: RealKeychainProvider(), runner: RealGhRunner())
 
 do {
-  try p.run()
-  p.waitUntilExit()
-  exit(p.terminationStatus)
+  let status = try app.run(
+    argv: Array(args),
+    stdin: stdinAll,
+    isTTY: isTTY,
+    promptSecret: { prompt in
+      (try? readSecret(prompt: prompt))
+    }
+  )
+  exit(status)
+} catch let e as GhwExit {
+  switch e {
+  case .exit(let code, let msg):
+    if let msg {
+      FileHandle.standardError.write(Data((msg + "\n").utf8))
+    }
+    exit(code)
+  }
 } catch {
-  FileHandle.standardError.write(Data(("Failed to run gh: \(error)\n").utf8))
-  exit(127)
+  FileHandle.standardError.write(Data(("ghw: \(error)\n").utf8))
+  exit(1)
 }
