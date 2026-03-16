@@ -24,8 +24,49 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Run unit tests
-        run: swift test
+      - name: Run unit tests (capture log)
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tee /tmp/swift-test.log
 
-      - name: Run acceptance smoke tests
-        run: ./scripts/acceptance-tests.sh
+      - name: Convert unit test output to JUnit
+        if: always()
+        run: |
+          ./scripts/swift-test-to-junit.py /tmp/swift-test.log /tmp/swift-test.junit.xml
+
+      - name: Upload unit test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-test-results
+          path: |
+            /tmp/swift-test.log
+            /tmp/swift-test.junit.xml
+
+      - name: Run acceptance smoke tests (capture log)
+        run: |
+          set -o pipefail
+          ./scripts/acceptance-tests.sh 2>&1 | tee /tmp/acceptance.log
+
+      - name: Upload acceptance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-results
+          path: /tmp/acceptance.log
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Tests (main)";
+            echo "";
+            echo "- Unit: swift test";
+            echo "- Acceptance: scripts/acceptance-tests.sh";
+            echo "";
+            echo "### Unit tests executed";
+            grep -E '^◇ Test ' /tmp/swift-test.log | sed -E 's/^◇ Test (.*) started\.$/- \1/' || true;
+            echo "";
+            echo "### Acceptance checks";
+            grep -E '^\[acceptance\] ok:' /tmp/acceptance.log | sed -E 's/^\[acceptance\] ok: /- ✅ /' || true;
+          } >> "$GITHUB_STEP_SUMMARY"
