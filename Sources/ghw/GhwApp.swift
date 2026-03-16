@@ -69,7 +69,10 @@ struct GhwApp {
     if argsArray.first == "login" {
       _ = argsArray.removeFirst()
       guard let user = popFlag("--as"), !user.isEmpty else {
-        throw GhwExit.exit(2, "login requires --as <github_username>")
+        throw GhwExit.exit(2, "login requires --as <alias>")
+      }
+      if argsArray.contains("--as") {
+        throw GhwExit.exit(2, "--as may only be provided once")
       }
 
       let token: String
@@ -112,6 +115,9 @@ struct GhwApp {
     }
 
     let asUser = popFlag("--as")
+    if argsArray.contains("--as") {
+      throw GhwExit.exit(2, "--as may only be provided once")
+    }
 
     // Block gh auth.*
     if argsArray.count >= 1, argsArray[0] == "auth" {
@@ -119,7 +125,7 @@ struct GhwApp {
     }
 
     guard let user = asUser, !user.isEmpty else {
-      throw GhwExit.exit(2, "Missing --as <github_username>.")
+      throw GhwExit.exit(2, "Missing --as <alias>.")
     }
 
     // Load token
