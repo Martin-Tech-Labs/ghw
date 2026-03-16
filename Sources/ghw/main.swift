@@ -139,8 +139,9 @@ if args.contains("--signing") {
 // Print per-invocation diag when enabled.
 printDiagIfEnabled()
 
-let stdinAll = readStdinAll()
 let isTTY = isatty(STDIN_FILENO) == 1
+// Only read stdin when it's not a TTY. Reading a TTY to EOF would block.
+let stdinAll = isTTY ? "" : readStdinAll()
 
 let app = GhwApp(keychain: RealKeychainProvider(), runner: RealGhRunner())
 
