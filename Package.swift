@@ -21,6 +21,7 @@ let package = Package(
     .testTarget(
       name: "ghwTests",
       dependencies: [
+        "ghw",
         .product(name: "Testing", package: "swift-testing")
       ],
       path: "Tests/ghwTests"
