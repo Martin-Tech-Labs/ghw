@@ -124,7 +124,7 @@ SIGN_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/sign.sh
 If you run `ghw login` in a normal terminal, it will prompt for the token with hidden input.
 
 ```bash
-ghw login --as <alias>
+ghw login --as <alias> 
 ```
 
 ### Automation/CI: stdin
