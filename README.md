@@ -4,7 +4,7 @@
 
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
-- requires `--as <github_username>` on every command (no defaults)
+- requires `--as <alias>` on every command (no defaults)
 - stores GitHub personal access tokens in **macOS Keychain**
 - injects environment variable `GH_TOKEN` into the `gh` subprocess environment
 - blocks `gh auth ...` so `gh` can’t store/read credentials via Keychain shell-outs
@@ -103,7 +103,7 @@ SIGN_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/sign.sh
 If you run `ghw login` in a normal terminal, it will prompt for the token with hidden input.
 
 ```bash
-ghw login --as <github_username>
+ghw login --as <alias>
 ```
 
 ### Automation/CI: stdin
@@ -111,20 +111,20 @@ ghw login --as <github_username>
 If stdin is not a TTY (piped input), `ghw login` reads the token from stdin:
 
 ```bash
-echo "$GITHUB_PAT" | ghw login --as <github_username>
+echo "$GITHUB_PAT" | ghw login --as <alias>
 ```
 
 ## Usage (always pass --as)
 
 ```bash
 # sanity check
-ghw --as <github_username> whoami
+ghw --as <alias> whoami
 
 # example command
-ghw --as <github_username> repo view <owner>/<repo>
+ghw --as <alias> repo view <owner>/<repo>
 
 # create PR using template
-ghw --as <github_username> pr create --body-file .github/pull_request_template.md
+ghw --as <alias> pr create --body-file .github/pull_request_template.md
 ```
 
 ## PR template
