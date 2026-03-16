@@ -34,26 +34,19 @@ jobs:
         run: |
           ./scripts/swift-test-to-junit.py /tmp/swift-test.log /tmp/swift-test.junit.xml
 
-      - name: Upload unit test artifacts
+      - name: Publish unit test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: dorny/test-reporter@v1
         with:
-          name: swift-test-results
-          path: |
-            /tmp/swift-test.log
-            /tmp/swift-test.junit.xml
+          name: Swift Unit Tests
+          path: /tmp/swift-test.junit.xml
+          reporter: java-junit
+          fail-on-error: false
 
       - name: Run acceptance smoke tests (capture log)
         run: |
           set -o pipefail
           ./scripts/acceptance-tests.sh 2>&1 | tee /tmp/acceptance.log
-
-      - name: Upload acceptance artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: acceptance-results
-          path: /tmp/acceptance.log
 
       - name: Job summary
         if: always()
