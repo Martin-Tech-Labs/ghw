@@ -6,6 +6,8 @@
 
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
+> Portability note (POC): `ghw` currently does **not** verify the code signature of the `gh` binary. To reduce PATH-based spoofing, it targets the Homebrew installation path (`/opt/homebrew/bin/gh`) by default.
+
 - requires `--as <alias>` on every command (no defaults)
 - stores GitHub personal access tokens in **macOS Keychain**
 - injects environment variable `GH_TOKEN` into the `gh` subprocess environment
