@@ -1,5 +1,7 @@
 # ghw
 
+[![Main](https://github.com/Martin-Tech-Labs/ghw/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Martin-Tech-Labs/ghw/actions/workflows/main.yml)
+
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
 - requires `--as <alias>` on every command (no defaults)
@@ -33,6 +35,16 @@
 ```bash
 swift build -c release
 ```
+
+## Tests
+
+Run locally:
+
+```bash
+swift test
+```
+
+(These are lightweight CI sanity checks; they mainly ensure the package and wrapper plumbing stay buildable.)
 
 Binary:
 - `./.build/release/ghw`
