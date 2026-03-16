@@ -4,10 +4,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-# Build debug binary (fast) for smoke/acceptance testing.
-swift build
-
 BIN="$ROOT_DIR/.build/debug/ghw"
+
+# Don't rebuild by default (CI already ran `swift test`).
+# Build only if the binary is missing.
+if [[ ! -x "$BIN" ]]; then
+  echo "[acceptance] ghw binary missing; building debug binary..."
+  swift build
+fi
+
 if [[ ! -x "$BIN" ]]; then
   echo "error: ghw binary not found at: $BIN" >&2
   exit 1
@@ -15,7 +20,7 @@ fi
 
 echo "[acceptance] ghw binary: $BIN"
 
-# 1) ghw auth fails (blocked before touching Keychain or gh)
+echo "[acceptance] test: auth blocked"
 set +e
 OUT="$($BIN --as alice auth login 2>&1)"
 CODE=$?
@@ -33,7 +38,7 @@ fi
 
 echo "[acceptance] ok: auth blocked"
 
-# 2) ghw login fails with fake credential
+echo "[acceptance] test: login fails for fake token"
 # Force gh validation to fail deterministically by pointing to a non-existent gh path (DEBUG-only override).
 set +e
 OUT="$(echo "fake-token" | GHW_GH_PATH="/nonexistent/gh" $BIN login --as alice 2>&1)"
