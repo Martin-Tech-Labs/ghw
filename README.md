@@ -1,6 +1,8 @@
 # ghw
 
 [![Main](https://github.com/Martin-Tech-Labs/ghw/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Martin-Tech-Labs/ghw/actions/workflows/main.yml)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![Swift 6.1+](https://img.shields.io/badge/Swift-6.1%2B-orange.svg?logo=swift)
 
 `ghw` is a thin wrapper around the GitHub CLI (`gh`) that:
 
