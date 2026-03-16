@@ -99,6 +99,89 @@ struct GhwAppTests {
   }
 
   @Test
+  func blocksAuthEvenWithoutAs() {
+    let keychain = MockKeychain()
+    let runner = MockRunner()
+    let app = GhwApp(keychain: keychain, runner: runner)
+
+    do {
+      _ = try app.run(
+        argv: ["auth", "login"],
+        stdin: "",
+        isTTY: false,
+        promptSecret: { _ in nil }
+      )
+      Issue.record("Expected auth to be blocked")
+    } catch let e as GhwExit {
+      if case .exit(let code, _) = e {
+        #expect(code == 2)
+      }
+    } catch {
+      Issue.record("Unexpected error: \(error)")
+    }
+
+    #expect(keychain.getCalls.isEmpty)
+    #expect(keychain.setCalls.isEmpty)
+    #expect(runner.calls.isEmpty)
+  }
+
+  @Test
+  func missingAsFailsBeforeInvokingGhOrKeychain() {
+    let keychain = MockKeychain()
+    let runner = MockRunner()
+    let app = GhwApp(keychain: keychain, runner: runner)
+
+    do {
+      _ = try app.run(
+        argv: ["repo", "view", "Martin-Tech-Labs/ghw"],
+        stdin: "",
+        isTTY: false,
+        promptSecret: { _ in nil }
+      )
+      Issue.record("Expected missing --as to fail")
+    } catch let e as GhwExit {
+      if case .exit(let code, let msg) = e {
+        #expect(code == 2)
+        #expect((msg ?? "").contains("Missing --as"))
+      }
+    } catch {
+      Issue.record("Unexpected error: \(error)")
+    }
+
+    #expect(keychain.getCalls.isEmpty)
+    #expect(keychain.setCalls.isEmpty)
+    #expect(runner.calls.isEmpty)
+  }
+
+  @Test
+  func duplicateAsIsRejected() {
+    let keychain = MockKeychain()
+    keychain.tokens = ["alice": "tok"]
+    let runner = MockRunner()
+    let app = GhwApp(keychain: keychain, runner: runner)
+
+    do {
+      _ = try app.run(
+        argv: ["--as", "alice", "--as", "bob", "repo", "view", "Martin-Tech-Labs/ghw"],
+        stdin: "",
+        isTTY: false,
+        promptSecret: { _ in nil }
+      )
+      Issue.record("Expected duplicate --as to fail")
+    } catch let e as GhwExit {
+      if case .exit(let code, let msg) = e {
+        #expect(code == 2)
+        #expect((msg ?? "").contains("--as"))
+      }
+    } catch {
+      Issue.record("Unexpected error: \(error)")
+    }
+
+    #expect(keychain.getCalls.isEmpty)
+    #expect(runner.calls.isEmpty)
+  }
+
+  @Test
   func loginStoresTokenOnlyAfterValidationSucceeds() throws {
     let keychain = MockKeychain()
     let runner = MockRunner()
